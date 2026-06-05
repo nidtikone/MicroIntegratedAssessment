@@ -1,0 +1,25 @@
+# Render Blueprint — deploys the Express API as a free web service.
+# In Render: New + -> Blueprint -> connect this repo. Secrets (sync:false) are
+# entered in the dashboard, never committed.
+services:
+  - type: web
+    name: micro-assessment-api
+    runtime: node
+    rootDir: server
+    plan: free
+    branch: main
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # MongoDB Atlas connection string (paste real value in dashboard).
+      - key: MONGO_URI
+        sync: false
+      # Comma-separated allowed origins. Leave empty for now (allows all);
+      # tighten to the Vercel URL once the frontend is deployed.
+      - key: CLIENT_ORIGINS
+        sync: false
+    # Note: Render injects PORT automatically; the app reads process.env.PORT.
