@@ -61,7 +61,7 @@ export default function FormDetailPage() {
           <ResponsesTab publicId={form.publicId} fields={form.fields} />
         </Tabs.Content>
         <Tabs.Content value="analytics" className="pt-6 focus:outline-none">
-          <AnalyticsTab publicId={form.publicId} fields={form.fields} />
+          <AnalyticsTab publicId={form.publicId} />
         </Tabs.Content>
       </Tabs.Root>
     </div>
