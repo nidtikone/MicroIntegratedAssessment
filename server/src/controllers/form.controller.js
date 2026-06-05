@@ -1,4 +1,5 @@
 const Form = require('../models/Form');
+const Response = require('../models/Response');
 const asyncHandler = require('../utils/asyncHandler');
 const ApiError = require('../utils/ApiError');
 const { sendSuccess } = require('../utils/apiResponse');
@@ -43,11 +44,12 @@ const getForm = asyncHandler(async (req, res) => {
   sendSuccess(res, form.toJSON());
 });
 
-/** DELETE /api/forms/:publicId — remove a form. (Response cascade added in Phase 2.) */
+/** DELETE /api/forms/:publicId — remove a form and cascade-delete its responses. */
 const deleteForm = asyncHandler(async (req, res) => {
   const form = await findFormOr404(req.params.publicId);
+  const { deletedCount } = await Response.deleteMany({ form: form._id });
   await form.deleteOne();
-  sendSuccess(res, { publicId: form.publicId, deleted: true });
+  sendSuccess(res, { publicId: form.publicId, deleted: true, responsesDeleted: deletedCount });
 });
 
 module.exports = {
