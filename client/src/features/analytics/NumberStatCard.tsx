@@ -13,13 +13,20 @@ export default function NumberStatCard({ field }: { field: NumberFieldAnalytics 
         <Hash size={15} className="text-slate-300" />
       </div>
       <p className="mt-2 text-3xl font-bold tracking-tight text-slate-900">
-        {hasData ? field.average : <span className="text-slate-300">—</span>}
+        {hasData ? (
+          <>
+            {field.average}
+            <span className="ml-1.5 text-base font-medium text-slate-400">avg</span>
+          </>
+        ) : (
+          <span className="text-slate-300">—</span>
+        )}
       </p>
       <p className="mt-1 text-xs text-slate-400">
         {hasData ? (
           <>
-            avg · min {field.min} / max {field.max} · {field.count}{' '}
-            {field.count === 1 ? 'value' : 'values'}
+            Min {field.min} · Max {field.max} · {field.count}{' '}
+            {field.count === 1 ? 'response' : 'responses'}
           </>
         ) : (
           'No numeric answers yet'
