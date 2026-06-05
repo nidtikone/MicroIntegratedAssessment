@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import * as Tabs from '@radix-ui/react-tabs';
 import { ArrowLeft, ExternalLink } from 'lucide-react';
@@ -6,7 +7,9 @@ import { LoadingState, ErrorState } from '../../components/StateViews';
 import { getApiError, getErrorMessage } from '../../utils/apiError';
 import CopyButton from '../../components/ui/CopyButton';
 import ResponsesTab from '../responses/ResponsesTab';
-import AnalyticsTab from '../analytics/AnalyticsTab';
+
+// Recharts is heavy — load it only when the Analytics tab is opened.
+const AnalyticsTab = lazy(() => import('../analytics/AnalyticsTab'));
 
 const tabTrigger =
   'px-4 py-2 text-sm font-medium text-slate-500 border-b-2 border-transparent transition-colors hover:text-slate-700 data-[state=active]:border-brand-600 data-[state=active]:text-brand-700';
@@ -57,11 +60,13 @@ export default function FormDetailPage() {
           </Tabs.Trigger>
         </Tabs.List>
 
-        <Tabs.Content value="responses" className="pt-6 focus:outline-none">
+        <Tabs.Content value="responses" className="animate-fade-in pt-6 focus:outline-none">
           <ResponsesTab publicId={form.publicId} fields={form.fields} />
         </Tabs.Content>
-        <Tabs.Content value="analytics" className="pt-6 focus:outline-none">
-          <AnalyticsTab publicId={form.publicId} />
+        <Tabs.Content value="analytics" className="animate-fade-in pt-6 focus:outline-none">
+          <Suspense fallback={<LoadingState label="Loading charts…" />}>
+            <AnalyticsTab publicId={form.publicId} />
+          </Suspense>
         </Tabs.Content>
       </Tabs.Root>
     </div>

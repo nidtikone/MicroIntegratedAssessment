@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, CheckCircle2, AlertCircle, ExternalLink } from 'lucide-react';
@@ -23,12 +23,14 @@ export default function BuilderPage() {
   const errors = useMemo(() => validateDraft(title, fields), [title, fields]);
   const showErrors = attempted;
 
-  function patchField(localId: string, patch: Partial<DraftField>) {
+  // Stable callbacks (functional updates) so memoized FieldEditors don't re-render.
+  const patchField = useCallback((localId: string, patch: Partial<DraftField>) => {
     setFields((prev) => prev.map((f) => (f.localId === localId ? { ...f, ...patch } : f)));
-  }
-  const addField = () => setFields((prev) => [...prev, createField()]);
-  const removeField = (localId: string) =>
+  }, []);
+  const removeField = useCallback((localId: string) => {
     setFields((prev) => prev.filter((f) => f.localId !== localId));
+  }, []);
+  const addField = () => setFields((prev) => [...prev, createField()]);
 
   async function handleSave() {
     setAttempted(true);
@@ -134,8 +136,8 @@ export default function BuilderPage() {
                 field={field}
                 index={i}
                 errors={showErrors ? errors.fields[field.localId] : undefined}
-                onChange={(patch) => patchField(field.localId, patch)}
-                onRemove={() => removeField(field.localId)}
+                onChange={patchField}
+                onRemove={removeField}
               />
             </motion.div>
           ))}

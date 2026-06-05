@@ -1,4 +1,5 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import type { Action } from '@reduxjs/toolkit';
 import type {
   CreateFormPayload,
   FormAnalytics,
@@ -7,6 +8,9 @@ import type {
   ResponseRecord,
   AnswerValue,
 } from '../../types';
+import { REHYDRATE_TYPE } from '../../app/persist';
+
+type RehydrateAction = Action<typeof REHYDRATE_TYPE> & { payload?: Record<string, unknown> };
 
 // The backend wraps everything as { success, data } / { success, error }.
 // We unwrap `data` on success; fetchBaseQuery surfaces the error body on failure.
@@ -18,6 +22,18 @@ export const api = createApi({
   reducerPath: 'api',
   baseQuery: fetchBaseQuery({ baseUrl }),
   tagTypes: ['Forms', 'Form', 'Responses', 'Analytics'],
+  // Serve cached data immediately; only refetch on mount if older than 60s.
+  // Combined with localStorage persistence (app/persist.ts) this avoids
+  // redundant API calls when revisiting a page or reloading.
+  refetchOnMountOrArgChange: 60,
+  keepUnusedDataFor: 300,
+  // Merge the persisted cache (dispatched on startup) the safe, official way.
+  extractRehydrationInfo(action, { reducerPath }) {
+    if (action.type === REHYDRATE_TYPE) {
+      return (action as RehydrateAction).payload?.[reducerPath] as never;
+    }
+    return undefined;
+  },
   endpoints: (build) => ({
     listForms: build.query<FormSummary[], void>({
       query: () => '/forms',

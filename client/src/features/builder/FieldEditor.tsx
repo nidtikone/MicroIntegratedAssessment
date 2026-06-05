@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { GripVertical, Trash2 } from 'lucide-react';
 import type { DraftField } from './draft';
 import { FIELD_TYPE_OPTIONS, isOptionType } from './draft';
@@ -11,11 +12,13 @@ interface FieldEditorProps {
   field: DraftField;
   index: number;
   errors?: FieldErrors;
-  onChange: (patch: Partial<DraftField>) => void;
-  onRemove: () => void;
+  // Stable, id-based callbacks so this component can be memoized.
+  onChange: (localId: string, patch: Partial<DraftField>) => void;
+  onRemove: (localId: string) => void;
 }
 
-export default function FieldEditor({ field, index, errors, onChange, onRemove }: FieldEditorProps) {
+function FieldEditorImpl({ field, index, errors, onChange, onRemove }: FieldEditorProps) {
+  const patch = (p: Partial<DraftField>) => onChange(field.localId, p);
   return (
     <div className="card p-4">
       <div className="flex items-start gap-3">
@@ -30,7 +33,7 @@ export default function FieldEditor({ field, index, errors, onChange, onRemove }
             </span>
             <button
               type="button"
-              onClick={onRemove}
+              onClick={() => onRemove(field.localId)}
               className="inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium text-slate-400 transition-colors hover:bg-red-50 hover:text-red-600"
             >
               <Trash2 size={13} /> Remove
@@ -45,7 +48,7 @@ export default function FieldEditor({ field, index, errors, onChange, onRemove }
                 className={`input ${errors?.label ? 'border-red-400 focus:border-red-500 focus:ring-red-500' : ''}`}
                 value={field.label}
                 placeholder="e.g. Full Name"
-                onChange={(e) => onChange({ label: e.target.value })}
+                onChange={(e) => patch({ label: e.target.value })}
               />
               {errors?.label && <p className="mt-1.5 text-xs text-red-600">{errors.label}</p>}
             </div>
@@ -53,7 +56,7 @@ export default function FieldEditor({ field, index, errors, onChange, onRemove }
               <label className="label mb-1.5">Type</label>
               <Select
                 value={field.type}
-                onValueChange={(v) => onChange({ type: v as FieldType })}
+                onValueChange={(v) => patch({ type: v as FieldType })}
                 options={FIELD_TYPE_OPTIONS}
               />
             </div>
@@ -63,7 +66,7 @@ export default function FieldEditor({ field, index, errors, onChange, onRemove }
           {isOptionType(field.type) && (
             <OptionsEditor
               options={field.options}
-              onChange={(options) => onChange({ options })}
+              onChange={(options) => patch({ options })}
               error={errors?.options}
             />
           )}
@@ -77,7 +80,7 @@ export default function FieldEditor({ field, index, errors, onChange, onRemove }
                   value={field.min}
                   inputMode="numeric"
                   placeholder="—"
-                  onChange={(e) => onChange({ min: e.target.value })}
+                  onChange={(e) => patch({ min: e.target.value })}
                 />
                 {errors?.min && <p className="mt-1.5 text-xs text-red-600">{errors.min}</p>}
               </div>
@@ -88,7 +91,7 @@ export default function FieldEditor({ field, index, errors, onChange, onRemove }
                   value={field.max}
                   inputMode="numeric"
                   placeholder="—"
-                  onChange={(e) => onChange({ max: e.target.value })}
+                  onChange={(e) => patch({ max: e.target.value })}
                 />
                 {errors?.max && <p className="mt-1.5 text-xs text-red-600">{errors.max}</p>}
               </div>
@@ -99,13 +102,13 @@ export default function FieldEditor({ field, index, errors, onChange, onRemove }
           <div className="flex flex-wrap items-center gap-5 pt-1">
             <Checkbox
               checked={field.required}
-              onCheckedChange={(required) => onChange({ required })}
+              onCheckedChange={(required) => patch({ required })}
               label="Required"
             />
             {field.type === 'text' && (
               <Checkbox
                 checked={field.emailFormat}
-                onCheckedChange={(emailFormat) => onChange({ emailFormat })}
+                onCheckedChange={(emailFormat) => patch({ emailFormat })}
                 label="Validate as email"
               />
             )}
@@ -115,3 +118,8 @@ export default function FieldEditor({ field, index, errors, onChange, onRemove }
     </div>
   );
 }
+
+// Memoized: with stable id-based callbacks, editing one field won't re-render
+// the others (their `field` ref, `errors`, and handlers stay referentially equal).
+const FieldEditor = memo(FieldEditorImpl);
+export default FieldEditor;
