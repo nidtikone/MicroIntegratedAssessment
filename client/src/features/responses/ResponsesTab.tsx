@@ -27,17 +27,24 @@ export default function ResponsesTab({ publicId, fields }: { publicId: string; f
       <p className="mb-3 text-sm text-slate-500">
         {responses.length} {responses.length === 1 ? 'response' : 'responses'}
       </p>
-      <div className="card overflow-x-auto">
+      <div className="card max-h-[70vh] overflow-auto">
         <table className="w-full min-w-max border-collapse text-sm">
           <thead>
-            <tr className="border-b border-slate-200 bg-slate-50 text-left">
-              <th className="whitespace-nowrap px-4 py-3 font-medium text-slate-400">#</th>
+            <tr className="text-left">
+              <th className="sticky top-0 z-10 whitespace-nowrap border-b border-slate-200 bg-slate-50 px-4 py-3 font-medium text-slate-400">
+                #
+              </th>
               {fields.map((f) => (
-                <th key={f.id} className="whitespace-nowrap px-4 py-3 font-medium text-slate-600">
+                <th
+                  key={f.id}
+                  className="sticky top-0 z-10 whitespace-nowrap border-b border-slate-200 bg-slate-50 px-4 py-3 font-medium text-slate-600"
+                >
                   {f.label}
                 </th>
               ))}
-              <th className="whitespace-nowrap px-4 py-3 font-medium text-slate-400">Submitted</th>
+              <th className="sticky top-0 z-10 whitespace-nowrap border-b border-slate-200 bg-slate-50 px-4 py-3 font-medium text-slate-400">
+                Submitted
+              </th>
             </tr>
           </thead>
           <tbody>
