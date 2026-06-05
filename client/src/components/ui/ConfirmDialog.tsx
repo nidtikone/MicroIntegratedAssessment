@@ -42,10 +42,11 @@ export default function ConfirmDialog({
             </Dialog.Overlay>
             <Dialog.Content asChild forceMount onOpenAutoFocus={(e) => e.preventDefault()}>
               <motion.div
-                className="card fixed left-1/2 top-1/2 z-50 w-[90vw] max-w-md -translate-x-1/2 -translate-y-1/2 p-6"
-                initial={{ opacity: 0, scale: 0.96, y: '-48%' }}
-                animate={{ opacity: 1, scale: 1, y: '-50%' }}
-                exit={{ opacity: 0, scale: 0.96, y: '-48%' }}
+                className="card fixed left-1/2 top-1/2 z-50 w-[90vw] max-w-md p-6"
+                style={{ x: '-50%', y: '-50%' }}
+                initial={{ opacity: 0, scale: 0.96 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.96 }}
                 transition={{ duration: 0.15 }}
               >
                 <Dialog.Title className="text-lg font-semibold text-slate-900">{title}</Dialog.Title>
